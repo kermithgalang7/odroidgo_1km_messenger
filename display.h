@@ -1,6 +1,9 @@
 #ifndef __DISPLAY_H__
 #define __DISPLAY_H__
 
+#include <string.h>
+#include <odroid_go.h>
+
 #define DISPLAY_BLANK       0
 #define DISPLAY_SPLASH      1
 #define DISPLAY_DEBUG       2
@@ -16,6 +19,15 @@
 
 #define MAX_LINEMESSAGE     15
 
+#define MAX_KEYX            15
+#define MAX_KEYY            3
+
+void keyb_left(void);
+void keyb_right(void);
+void keyb_up(void);
+void keyb_down(void);
+void keyb_ok(void);
+void keyb_cancel(void);
 
 void push_message_queue(String msg);
 void display_init(void);

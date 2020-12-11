@@ -6,17 +6,20 @@
 #include "display.h"
 #include "gpio.h"
 #include "wifi.h"
+#include "uart_handler.h"
 
-#define HW_SERIAL_TX    15
 
-HardwareSerial serial1(1);
 
 int program_flow = 0;
 
 void hardware_init(void)
 {
+  audio_init();
+  battery_level_init();
+  output_init();
+  input_init();
   display_init();  
-  
+  uart_handler_init();  
 }
 
 void heart_beat()
@@ -31,33 +34,15 @@ void setup() {
   // put your setup code here, to run once:
   GO.begin();
 
-  serial1.begin(9600, SERIAL_8N1, 15, 4);
-
   hardware_init();
 }
 
-String testmsg = "";
-char carray[100];
-char c;
-int i = 0;
+int cinput;
 int cdisplay;
 void loop() {
   // put your main code here, to run repeatedly:
 
-//  serial1.println("kermith ");
-  if(serial1.available())
-  {    
-    c = serial1.read();
-    if(c != '\r')
-    {
-      carray[i] = c;
-      i++;
-    }    
-    else
-      push_message_queue(testmsg);
-  }
-    
-  
+  cinput = consume_input();
   cdisplay = get_display_page();
   switch(cdisplay)
   {
@@ -73,11 +58,39 @@ void loop() {
       {
         program_flow = 0;
         set_display_page(DISPLAY_MAIN);
+//        set_display_page(DISPLAY_DEBUG);
       }
+    break;
+    case DISPLAY_MAIN:
+#if 1
+      if(cinput == BUT_MENU)
+        set_display_page(DISPLAY_DEBUG);
+      if(cinput == BUT_LEFT)
+        keyb_left();
+      if(cinput == BUT_RIGHT)
+        keyb_right();
+      if(cinput == BUT_UP)
+        keyb_up();
+      if(cinput == BUT_DOWN)
+        keyb_down();
+      if(cinput == BUT_A)
+        keyb_ok();
+      if(cinput == BUT_B)
+        keyb_cancel();        
+#endif
+    break;
+    case DISPLAY_DEBUG:
+      if(cinput == BUT_MENU)
+        set_display_page(DISPLAY_MAIN);
     break;
   }
 
+  audio_service();
+  battery_level_service();
   display_service();
+  led_service();
+  input_service();
+  uart_handler_service();
   GO.update();
   heart_beat();
 }
