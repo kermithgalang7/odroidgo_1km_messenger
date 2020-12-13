@@ -8,12 +8,14 @@
 #include "wifi.h"
 #include "uart_handler.h"
 
-
-
+int is_system_in_lowvoltage_state = 0;
 int program_flow = 0;
 
 void hardware_init(void)
 {
+  if(get_battery_level() < 3.5)
+    is_system_in_lowvoltage_state = 1;
+  
   audio_init();
   battery_level_init();
   output_init();
@@ -39,8 +41,21 @@ void setup() {
 
 int cinput;
 int cdisplay;
+double batt;
 void loop() {
   // put your main code here, to run repeatedly:
+
+  batt = get_battery_level();
+  if(batt <= 3.5)
+  {
+    if(is_system_in_lowvoltage_state == 0)  
+    {
+      is_system_in_lowvoltage_state = 1;
+      enable_1sec_interval();
+    }
+  }
+  else
+    is_system_in_lowvoltage_state = 0;
 
   cinput = consume_input();
   if(cinput != BUT_NONE)
