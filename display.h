@@ -19,8 +19,16 @@
 
 #define MAX_LINEMESSAGE     15
 
-#define MAX_KEYX            15
+
+#define MAX_KEYX            14
 #define MAX_KEYY            3
+
+#define KEYSET1             "QWERTYUIOP[]  "
+#define KEYSET2             "ASDFGHJKL;'\\  "
+#define KEYSET3             "ZXCVBNM,./    "
+#define KEYSET4             "qwertyuiop[]  "
+#define KEYSET5             "asdfghjkl;'\\  "
+#define KEYSET6             "zxcvbnm,./    "
 
 void keyb_left(void);
 void keyb_right(void);

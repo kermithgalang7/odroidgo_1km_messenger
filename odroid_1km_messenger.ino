@@ -43,6 +43,12 @@ void loop() {
   // put your main code here, to run repeatedly:
 
   cinput = consume_input();
+  if(cinput != BUT_NONE)
+  {
+    run_tone(5);
+    disable_interval();
+  }
+    
   cdisplay = get_display_page();
   switch(cdisplay)
   {
@@ -51,13 +57,15 @@ void loop() {
       {
         program_flow = 0;
         set_display_page(DISPLAY_SPLASH);
+        push_message_queue("test");
       }
     break;
     case DISPLAY_SPLASH:
-      if(program_flow == 500)
+      if(program_flow == 100)
       {
         program_flow = 0;
         set_display_page(DISPLAY_MAIN);
+        push_message_queue("test1");
 //        set_display_page(DISPLAY_DEBUG);
       }
     break;

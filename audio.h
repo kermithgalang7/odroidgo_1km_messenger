@@ -10,6 +10,7 @@ int enable_1sec_interval(void);
 int disable_1sec_interval(void);
 int enable_5sec_interval(void);
 int disable_5sec_interval(void);
+int disable_interval(void);
 
 int audio_service(void);
 

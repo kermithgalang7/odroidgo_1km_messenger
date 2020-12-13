@@ -5,6 +5,7 @@
 #define SW_SERIAL_RX    4
 
 void uart_handler_init(void);
+int send_uart_message(char* msg);
 int uart_handler_service(void);
 
 

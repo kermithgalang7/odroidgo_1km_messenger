@@ -1,5 +1,6 @@
 #include <string.h>
 
+#include "audio.h"
 #include "uart_handler.h"
 #include "display.h"
 
@@ -10,6 +11,12 @@ int i = 0;
 void uart_handler_init(void)
 {
   softserial.begin(9600, SERIAL_8N1, SW_SERIAL_TX, SW_SERIAL_RX);
+}
+
+int send_uart_message(char* msg)
+{
+  softserial.println(msg);
+  return 0;
 }
 int uart_handler_service(void)
 {
@@ -29,6 +36,7 @@ int uart_handler_service(void)
     {
       testmsg = carray;
       push_message_queue(testmsg);
+      enable_1sec_interval();
       memset(carray, 0, 100);
       i = 0;
     }

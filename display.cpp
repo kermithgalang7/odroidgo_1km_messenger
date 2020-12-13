@@ -2,30 +2,39 @@
 
 #include "display.h"
 #include "battery.h"
+#include "uart_handler.h"
 
 int current_display;
-char current_message[50] = "test";
+char current_message[15] = "";
 int current_m_index = 0;
 String messages[MAX_LINEMESSAGE];
 char edit_text[100];
 
+int keyboard_capital = 0;
 int current_x = 0;
 int current_y = 0;
 char keyb1[15] = "QWERTYUIOP[]  ";
-char keyb2[15] = "ASDFGHJKL;'\\ ";  
+char keyb2[15] = "ASDFGHJKL;'\\  ";  
 char keyb3[15] = "ZXCVBNM,./    ";
+char keyb4[15] = "qwertyuiop[]  ";
+char keyb5[15] = "asdfghjkl;'\\  ";
+char keyb6[15] = "zxcvbnm,./    ";
 
 extern int display_keyboard_now;
 
 void push_message_queue(String msg)
 {
   GO.lcd.clearDisplay();  
-  #if 1
-  for(int i = 0; i < MAX_LINEMESSAGE; i++)
+//  for(int i = 0; i < MAX_LINEMESSAGE; i++)
   {
-    messages[MAX_LINEMESSAGE - i - 1] = messages[MAX_LINEMESSAGE - i - 2];
+//    messages[MAX_LINEMESSAGE - i - 1] = messages[MAX_LINEMESSAGE - i - 2];
   }
-  #endif
+  for(int i = MAX_LINEMESSAGE - 1; i > 0; i--)
+  {  
+    messages[i] = messages[i - 1];
+  }
+//  messages[2] = messages[1];
+//  messages[1] = messages[0];
   messages[0] = msg;
 }
 
@@ -87,12 +96,51 @@ void keyb_down(void)
 }
 void keyb_ok(void)
 {
-  if(current_y == 0)
-    current_message[current_m_index] = keyb1[current_x];
-  if(current_y == 1)
-    current_message[current_m_index] = keyb2[current_x];
-  if(current_y == 2)
-    current_message[current_m_index] = keyb3[current_x];
+  String tmpstr = "sample";
+  if((current_y == 0) && (current_x == 13))
+  {
+    keyb_cancel();
+    return;
+  }
+  if((current_y == 1) && (current_x == 13))
+  {    
+    if(keyboard_capital == 0)
+      keyboard_capital = 1;
+    else
+      keyboard_capital = 0;
+    return;
+  }
+  if((current_y == 2) && (current_x == 13))
+  {    
+    if(current_m_index != 0)
+    {
+      current_message[14] = 0;
+      tmpstr = current_message; 
+      push_message_queue(tmpstr); //BUG HERE
+      send_uart_message(current_message);    
+      current_m_index = 0;
+      memset(current_message, 0, 15);
+    }
+    return;
+  }
+  if(keyboard_capital == 1)
+  {
+    if(current_y == 0)
+      current_message[current_m_index] = keyb1[current_x];
+    if(current_y == 1)
+      current_message[current_m_index] = keyb2[current_x];
+    if(current_y == 2)
+      current_message[current_m_index] = keyb3[current_x];
+  }
+  else
+  {
+    if(current_y == 0)
+      current_message[current_m_index] = keyb4[current_x];
+    if(current_y == 1)
+      current_message[current_m_index] = keyb5[current_x];
+    if(current_y == 2)
+      current_message[current_m_index] = keyb6[current_x];    
+    }
   current_m_index++;
 }
 void keyb_cancel(void)
@@ -102,41 +150,62 @@ void keyb_cancel(void)
   current_message[current_m_index] = ' ';    
 }
 int compose_keyboard(void)
-{  
+{    
   for(int i = 0; i < MAX_KEYY; i++)
   {
     for(int j = 0; j < MAX_KEYX; j++)
     { 
+      GO.lcd.setTextSize(2);
       if((current_x == j) && (current_y == i))
-      {
-        GO.lcd.setTextSize(2);
+      {        
         GO.lcd.setTextColor(YELLOW, BLUE);  
       }
       else
       {
-        GO.lcd.setTextSize(2);
         GO.lcd.setTextColor(RED, BLACK);  
       }
       GO.lcd.setCursor((20 * j) + 20, (20 * i) + 180);
-      switch(i)
+      if((i == 0) && (j == 13))
       {
-        case 0: 
-          GO.lcd.print(keyb1[j]);
-        break;
-        case 1: 
-          GO.lcd.print(keyb2[j]);
-        break;
-        case 2: 
-          GO.lcd.print(keyb3[j]);
-        break;
+        GO.lcd.setTextSize(1);
+        GO.lcd.print("Back");
+      }
+      if((i == 1) && (j == 13))
+      {
+        GO.lcd.setTextSize(1);
+        GO.lcd.print("Up");
+      }
+      if((i == 2) && (j == 13))
+      {
+        GO.lcd.setTextSize(1);
+        GO.lcd.print("Send");
+      }
+      else
+      {
+        switch(i)
+        {
+          case 0: 
+            if(keyboard_capital == 1)
+              GO.lcd.print(keyb1[j]);
+            else
+              GO.lcd.print(keyb4[j]);
+          break;
+          case 1:             
+            if(keyboard_capital == 1)
+              GO.lcd.print(keyb2[j]);
+            else
+              GO.lcd.print(keyb5[j]);
+          break;
+          case 2:             
+            if(keyboard_capital == 1)
+              GO.lcd.print(keyb3[j]);
+            else
+              GO.lcd.print(keyb6[j]);
+          break;
+        }
       }
     }
   }
-//  GO.lcd.print("QWERTYUIOP[]");
-//  GO.lcd.setCursor(20, 170);
-//  GO.lcd.print("ASDFGHJKL;'\\");  
-//  GO.lcd.setCursor(20, 190);
-//  GO.lcd.print("ZXCVBNM,./");
   return 0;
 }
 
