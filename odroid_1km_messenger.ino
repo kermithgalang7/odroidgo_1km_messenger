@@ -55,7 +55,13 @@ void loop() {
     }
   }
   else
-    is_system_in_lowvoltage_state = 0;
+  {
+    if(is_system_in_lowvoltage_state == 1)
+    {
+      is_system_in_lowvoltage_state = 0;
+      disable_1sec_interval();
+    }
+  }
 
   cinput = consume_input();
   if(cinput != BUT_NONE)
